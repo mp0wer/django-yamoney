@@ -2,6 +2,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils import formats
+from django.contrib.contenttypes.models import ContentType
 
 
 class Transaction(models.Model):
@@ -35,3 +36,25 @@ class Transaction(models.Model):
             self.get_currency_display(),
             formats.date_format(timezone.localtime(self.datetime), 'DATETIME_FORMAT')
         )
+
+    def get_related_obj(self):
+        if self.label:
+            obj_type_str, obj_pk = self.label.split('-')
+            if obj_type_str and obj_pk:
+                app_label, model_name = obj_type_str.split('.')
+                try:
+                    obj_type = ContentType.objects.get_by_natural_key(app_label, model_name)
+                except ContentType.DoesNotExist:
+                    return None
+                try:
+                    obj = obj_type.get_object_for_this_type(pk=obj_pk)
+                except obj_type.DoesNotExist:
+                    return None
+                else:
+                    return obj
+        return None
+
+    @staticmethod
+    def generate_label(obj):
+        obj_type = ContentType.objects.get_for_model(obj)
+        return '%s-%s' % ('.'.join(obj_type.natural_key()), obj.pk)

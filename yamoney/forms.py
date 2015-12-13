@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from hashlib import sha1
+from django.db import models
 from django import forms
 from yamoney import settings as yamoney_settings
 from yamoney.models import Transaction
@@ -44,6 +45,7 @@ class YandexNotificationForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
+        fields = '__all__'
 
     def make_hash(self):
         cd = self.data
@@ -68,6 +70,8 @@ class YandexNotificationForm(forms.ModelForm):
 
 
 def paymentform_factory(targets, sum, label):
+    if isinstance(label, models.Model):
+        label = Transaction.generate_label(label)
     initial = {
         'receiver': yamoney_settings.ACCOUNT,
         'formcomment': yamoney_settings.FORM_COMMENT or targets,

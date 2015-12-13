@@ -29,6 +29,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     install_requires=[
-        'Django>=1.5,<1.7',
+        'Django>=1.7,<1.9',
+        'python-dateutil>=2.4'
     ]
 )

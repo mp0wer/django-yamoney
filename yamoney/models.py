@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils import formats
 from django.contrib.contenttypes.models import ContentType
+from yamoney.signals import transaction_success
 
 
 class Transaction(models.Model):
@@ -47,12 +48,22 @@ class Transaction(models.Model):
                 except ContentType.DoesNotExist:
                     return None
                 try:
+                    obj_pk = int(obj_pk)
+                except ValueError:
+                    return None
+                try:
                     obj = obj_type.get_object_for_this_type(pk=obj_pk)
                 except obj_type.DoesNotExist:
                     return None
                 else:
                     return obj
         return None
+    
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super(Transaction, self).save(*args, **kwargs)
+        if created:
+            transaction_success.send(sender=self, related_obj=self.get_related_obj())
 
     @staticmethod
     def generate_label(obj):

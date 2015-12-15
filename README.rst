@@ -23,8 +23,8 @@ Django приложение для приема денег на кошелек Y
     payment_form = paymentform_factory(
         u'Оплата участия',  # описание платежа
         2000,               # сумма
-        'event-15'          # метка, чтобы в последствии привязать платеж к конкретному event
+        event               # объект модели
     )
 
-4. Слушать post_save сигнал модели yamoney.Transaction на создание новой transaction.
+4. Слушать yamoney.signals.transaction_success сигнал, где sender - транзакция, related_obj - объект модели.
 

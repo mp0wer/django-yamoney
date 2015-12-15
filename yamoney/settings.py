@@ -12,3 +12,4 @@ def get_setting(name, default):
 ACCOUNT = get_setting('ACCOUNT', None)
 FORM_COMMENT = get_setting('FORM_COMMENT', None)
 NOTIFICATION_SECRET = get_setting('NOTIFICATION_SECRET', '')
+MAIL_ADMINS_ON_TRANSACTION_ERROR = get_setting('MAIL_ADMINS_ON_TRANSACTION_ERROR', False)

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from django.test import TestCase
 from django.utils import timezone
-from yamoney.models import Transaction
+from .models import Transaction
 
 
 class TransactionTestCase(TestCase):
-
     def test_transaction_create(self):
         """Transaction must be created"""
         test_data = {

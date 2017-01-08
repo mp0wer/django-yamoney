@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from hashlib import sha1
 from django.db import models
 from django import forms
-from yamoney import settings as yamoney_settings
-from yamoney.models import Transaction
-from yamoney.fields import DateTimeISO6801Field
+from .conf import settings
+from .models import Transaction
+from .fields import DateTimeISO6801Field
 
 
 class YandexPaymentForm(forms.Form):
@@ -15,8 +16,8 @@ class YandexPaymentForm(forms.Form):
         ('small', 'small'),
     )
     PAYMENTTYPE_CHOICES = (
-        ('PC', u'оплата со счета Яндекс.Денег'),
-        ('AC', u'оплата с банковской карты')
+        ('PC', 'оплата со счета Яндекс.Денег'),
+        ('AC', 'оплата с банковской карты')
     )
     FIELD_NAME_MAPPING = {
         'shortDest': 'short-dest',
@@ -28,10 +29,11 @@ class YandexPaymentForm(forms.Form):
     quickpayForm = forms.ChoiceField(choices=QUICKPAY_CHOICES, initial='shop', widget=forms.HiddenInput)
     targets = forms.CharField(max_length=150, widget=forms.HiddenInput)
     sum = forms.FloatField(widget=forms.HiddenInput)
-    paymentType = forms.ChoiceField(label=u'Варианты оплаты', choices=PAYMENTTYPE_CHOICES,
+    paymentType = forms.ChoiceField(label='Варианты оплаты', choices=PAYMENTTYPE_CHOICES,
                                     initial='AC',
                                     widget=forms.RadioSelect)
     label = forms.CharField(required=False, widget=forms.HiddenInput)
+
     # comment = forms.CharField(required=False, max_length=200, widget=forms.HiddenInput)
 
     def add_prefix(self, field_name):
@@ -57,15 +59,15 @@ class YandexNotificationForm(forms.ModelForm):
             cd.get('datetime', ''),
             cd.get('sender', ''),
             cd.get('codepro', ''),
-            yamoney_settings.NOTIFICATION_SECRET,
+            settings.YAMONEY_NOTIFICATION_SECRET,
             cd.get('label', ''),
         )))).hexdigest()
-    
+
     def clean(self):
         cd = super(YandexNotificationForm, self).clean()
         sha1_hash = cd.get('sha1_hash')
         if sha1_hash != self.make_hash():
-            raise forms.ValidationError(u'Хэш не совпадает')
+            raise forms.ValidationError('Хэш не совпадает')
         return cd
 
 
@@ -73,8 +75,8 @@ def paymentform_factory(targets, sum, label):
     if isinstance(label, models.Model):
         label = Transaction.generate_label(label)
     initial = {
-        'receiver': yamoney_settings.ACCOUNT,
-        'formcomment': yamoney_settings.FORM_COMMENT or targets,
+        'receiver': settings.YAMONEY_ACCOUNT,
+        'formcomment': settings.YAMONEY_FORM_COMMENT or targets,
         'shortDest': targets,
         'targets': targets,
         'sum': sum,

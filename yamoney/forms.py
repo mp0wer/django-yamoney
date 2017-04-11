@@ -6,6 +6,7 @@ from django import forms
 from .conf import settings
 from .models import Transaction
 from .fields import DateTimeISO6801Field
+from .widgets import LowercaseHiddenInput
 
 
 class YandexPaymentForm(forms.Form):
@@ -16,24 +17,30 @@ class YandexPaymentForm(forms.Form):
         ('small', 'small'),
     )
     PAYMENTTYPE_CHOICES = (
+        ('AC', 'оплата с банковской карты'),
         ('PC', 'оплата со счета Яндекс.Денег'),
-        ('AC', 'оплата с банковской карты')
     )
     FIELD_NAME_MAPPING = {
         'shortDest': 'short-dest',
         'quickpayForm': 'quickpay-form',
+        'needFio': 'need-fio',
+        'needEmail': 'need-email',
+        'needPhone': 'need-phone',
     }
     receiver = forms.CharField(widget=forms.HiddenInput)
     formcomment = forms.CharField(max_length=50, widget=forms.HiddenInput)
     shortDest = forms.CharField(max_length=50, widget=forms.HiddenInput)
     quickpayForm = forms.ChoiceField(choices=QUICKPAY_CHOICES, initial='shop', widget=forms.HiddenInput)
     targets = forms.CharField(max_length=150, widget=forms.HiddenInput)
-    sum = forms.FloatField(widget=forms.HiddenInput)
+    sum = forms.DecimalField(max_digits=18, decimal_places=2, widget=forms.HiddenInput)
     paymentType = forms.ChoiceField(label='Варианты оплаты', choices=PAYMENTTYPE_CHOICES,
                                     initial='AC',
                                     widget=forms.RadioSelect)
     label = forms.CharField(required=False, widget=forms.HiddenInput)
     # comment = forms.CharField(required=False, max_length=200, widget=forms.HiddenInput)
+    needFio = forms.BooleanField(initial=False, widget=LowercaseHiddenInput)
+    needEmail = forms.BooleanField(initial=False, widget=LowercaseHiddenInput)
+    needPhone = forms.BooleanField(initial=False, widget=LowercaseHiddenInput)
 
     def add_prefix(self, field_name):
         field_name = self.FIELD_NAME_MAPPING.get(field_name, field_name)
@@ -70,9 +77,10 @@ class YandexNotificationForm(forms.ModelForm):
         return cd
 
 
-def paymentform_factory(targets, sum, label):
+def paymentform_factory(targets, sum, label, need_fio=False, need_email=False, need_phone=False):
     if isinstance(label, models.Model):
         label = Transaction.generate_label(label)
+
     initial = {
         'receiver': settings.YAMONEY_ACCOUNT,
         'formcomment': settings.YAMONEY_FORM_COMMENT or targets,
@@ -80,5 +88,8 @@ def paymentform_factory(targets, sum, label):
         'targets': targets,
         'sum': sum,
         'label': label,
+        'needFio': need_fio,
+        'needEmail': need_email,
+        'needPhone': need_phone
     }
     return YandexPaymentForm(initial=initial)

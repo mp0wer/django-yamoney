@@ -33,7 +33,7 @@ class Transaction(models.Model):
     codepro = models.BooleanField('Служебное', default=False)
     label = models.CharField('Метка платежа', max_length=255, blank=True)
     test_notification = models.BooleanField('Тестовая операция', default=False)
-    unaccepted = models.BooleanField('Перевод не зачислен', default=True,
+    unaccepted = models.BooleanField('Перевод не зачислен', default=False,
                                      help_text='Получателю нужно освободить место в кошельке '
                                                'или использовать код протекции')
     lastname = models.CharField('Фамилия отправителя', max_length=255, blank=True)

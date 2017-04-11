@@ -4,5 +4,6 @@
 *.tar*
 *.zip
 *.rar
+.tox/
 dist/
 django_yamoney.egg-info

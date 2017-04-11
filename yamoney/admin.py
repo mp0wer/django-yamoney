@@ -6,6 +6,8 @@ from .models import Transaction
 
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ('notification_type', 'withdraw_amount', 'amount', 'currency', 'datetime',)
+    list_filter = ('notification_type', )
+    date_hierarchy = 'datetime'
 
     def has_add_permission(self, request):
         return False

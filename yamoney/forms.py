@@ -33,7 +33,6 @@ class YandexPaymentForm(forms.Form):
                                     initial='AC',
                                     widget=forms.RadioSelect)
     label = forms.CharField(required=False, widget=forms.HiddenInput)
-
     # comment = forms.CharField(required=False, max_length=200, widget=forms.HiddenInput)
 
     def add_prefix(self, field_name):
@@ -61,7 +60,7 @@ class YandexNotificationForm(forms.ModelForm):
             cd.get('codepro', ''),
             settings.YAMONEY_NOTIFICATION_SECRET,
             cd.get('label', ''),
-        )))).hexdigest()
+        ))).encode('utf-8')).hexdigest()
 
     def clean(self):
         cd = super(YandexNotificationForm, self).clean()

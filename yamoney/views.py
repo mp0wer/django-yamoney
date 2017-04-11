@@ -19,12 +19,13 @@ class NotificationView(CreateView):
 
     def form_invalid(self, form):
         if settings.YAMONEY_MAIL_ADMINS_ON_TRANSACTION_ERROR:
+            import json
             mail_admins(
-                'Yamoney error',
-                'form data: {form_data}\n\nform errors: {form_errors}'.format({
-                    'form_data': self.request.POST,
-                    'form_errors': form.errors.as_text()
-                }),
+                settings.YAMONEY_MAIL_ADMINS_ON_TRANSACTION_ERROR_SUBJECT,
+                'Form data: \n{form_data}\n\nForm errors: \n{form_errors}'.format(
+                    form_data=json.dumps(dict(self.request.POST), sort_keys=True, indent=4),
+                    form_errors=form.errors.as_text()
+                ),
             )
         return HttpResponseBadRequest()
 
